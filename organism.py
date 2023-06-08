@@ -1,5 +1,6 @@
 import textwrap
 import random
+import numpy as np
 
 
 class Organism:
@@ -41,12 +42,15 @@ class Organism:
         self.offspring = []
         self.neighbours = []
         self.hunger = 0
-        self.position = (0, 0)
-        self.velocity = (0, 0)
+        self.position = np.zeros(2)
+        self.velocity = np.zeros(2)
         self.reproduced_this_epoch = False
         self.is_alive = False
 
     def reset(self) -> None:
+        """
+        prepares to begin a new epoch
+        """
         self.position, self.velocity = self.navigator.initialize()
         self.hunger = self.base_hunger
         self.is_alive = True
@@ -54,26 +58,41 @@ class Organism:
         self.offspring = []
 
     def advance_time(self) -> None:
+        """
+        runs the basic interactions of a time tick
+        """
         self.move()
         self.eat()
         self.reproduce()
 
     def move(self) -> None:
-        self.position, self.velocity = self.navigator.move(
-            self.position, self.velocity, self.speed, self.neighbours
+        """
+        updates position and velocity
+        """
+        position, orientation = self.navigator.move(
+            self.position, self.speed, self.neighbours
         )
 
     def eat(self) -> None:
+        """
+        tries to eat another organism if its alive and in range.
+        """
         for neighbour in self.neighbours:
             if neighbour.is_alive():
-                if self.is_in_range(neighbour.get_position()) and self.is_successful_attempt(self.feeding_chance):
+                if self.is_in_range(
+                    neighbour.get_position()
+                ) and self.is_successful_attempt(self.feeding_chance):
                     food = neighbour.be_eaten()
                     self.feed(food)
                     return
             else:
+                # if neighbour is dead stops tracking it
                 self.remove_from_neighbours(neighbour)
 
     def reproduce(self) -> None:
+        """
+        tries to produce offspring if its satiated
+        """
         if self.is_satiated() and self.is_successful_attempt(self.offspring_chance):
             self.produce_offspring()
 
@@ -92,9 +111,15 @@ class Organism:
         return txt
 
     def is_satiated(self) -> bool:
+        """
+        has this organism eaten enough food already?
+        """
         return self.hunger <= 0
 
     def produce_offspring(self) -> None:
+        """
+        creates a new organism and adds it to offspring list
+        """
         for i in range(self.litter_size):
             child = Organism(
                 self.species_name,
@@ -109,18 +134,33 @@ class Organism:
             self.offspring.append(child)
 
     def feed(self, food: int) -> None:
+        """
+        lowers hunger level
+        """
         self.hunger -= food
 
     def remove_from_neighbours(self, neighbour: Organism) -> None:
+        """
+        removes another organism from the neighbour list
+        """
         self.neighbours.remove(neighbour)
 
     def be_eaten(self) -> int:
+        """
+        dies and is turned into food
+        """
         self.is_alive = False
         food = int(self.base_hunger / 5) + 1
         return food
 
-    def is_in_range(self, position) -> bool:
+    def is_in_range(self, position: np.ndarray[float, float]) -> bool:
+        """
+        is that other organism inside my feeding range?
+        """
         return self.navigator.is_in_range(self.position, position, self.feeding_range)
 
-    def get_position(self) -> (int, int):
+    def get_position(self) -> np.ndarray[float, float]:
+        """
+        :returns: (x, y)
+        """
         return self.position
