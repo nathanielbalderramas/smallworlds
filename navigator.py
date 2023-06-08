@@ -104,4 +104,3 @@ if __name__ == "__main__":
     print(p0, o0, n1.orientation)
     p1, v1 = n1.move(p0, 10, [])
     print(p1, v1)
-    
