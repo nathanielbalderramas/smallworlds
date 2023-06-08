@@ -19,16 +19,18 @@ class Organism:
     def __init__(
         self,
         species_name: str,
+        trophic_level: int,
         navigator: Navigator,
-        speed: int,
+        speed: float,
         base_hunger: int,
-        feeding_range: int,
+        feeding_range: float,
         feeding_chance: int,
         offspring_chance: int,
         litter_size: int,
     ) -> None:
         # parameter dependent attributes
         self.species_name = species_name
+        self.trophic_level = trophic_level
         self.navigator = navigator
         self.speed = speed
         self.base_hunger = base_hunger
@@ -69,9 +71,10 @@ class Organism:
         """
         updates position and velocity
         """
-        position, orientation = self.navigator.move(
+        self.position, orientation = self.navigator.move(
             self.position, self.speed, self.neighbours
         )
+        self.velocity = self.speed * orientation
 
     def eat(self) -> None:
         """
@@ -79,9 +82,11 @@ class Organism:
         """
         for neighbour in self.neighbours:
             if neighbour.is_alive():
-                if self.is_in_range(
-                    neighbour.get_position()
-                ) and self.is_successful_attempt(self.feeding_chance):
+                if (
+                    self.outrank(neighbour)
+                    and self.is_in_range(neighbour.get_position())
+                    and self.is_successful_attempt(self.feeding_chance)
+                ):
                     food = neighbour.be_eaten()
                     self.feed(food)
                     return
@@ -123,6 +128,7 @@ class Organism:
         for i in range(self.litter_size):
             child = Organism(
                 self.species_name,
+                self.trophic_level,
                 self.navigator,
                 self.speed,
                 self.base_hunger,
@@ -164,3 +170,10 @@ class Organism:
         :returns: (x, y)
         """
         return self.position
+
+    def outrank(self, neighbour: Organism) -> bool:
+        """
+        :param neighbour: Organism
+        :return: bool
+        """
+        return self.trophic_level > neighbour.trophic_level
