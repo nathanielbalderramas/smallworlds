@@ -16,6 +16,14 @@ class Navigator:
     def initialize(self) -> ((int, int), (int, int)):
         pass
 
+    def is_in_range(self, position_a: (int, int), position_b: (int, int), threshold: int) -> bool:
+        distance = self.calculate_distance(position_a, position_b)
+        return distance <= threshold
+
+    @staticmethod
+    def calculate_distance(position_a: (int, int), position_b: (int, int)) -> float:
+        pass
+
 
 class Organism:
     last_id = 1
@@ -40,7 +48,7 @@ class Organism:
         feeding_chance: int,
         offspring_chance: int,
         litter_size: int,
-    ):
+    ) -> None:
         # parameter dependent attributes
         self.species_name = species_name
         self.navigator = navigator
@@ -61,27 +69,34 @@ class Organism:
         self.reproduced_this_epoch = False
         self.is_alive = False
 
-    def reset(self):
+    def reset(self) -> None:
         self.position, self.velocity = self.navigator.initialize()
         self.hunger = self.base_hunger
         self.is_alive = True
         self.reproduced_this_epoch = False
         self.offspring = []
 
-    def advance_time(self):
+    def advance_time(self) -> None:
         self.move()
         self.eat()
         self.reproduce()
 
-    def move(self):
+    def move(self) -> None:
         self.position, self.velocity = self.navigator.move(
             self.position, self.velocity, self.speed, self.neighbours
         )
 
-    def eat(self):
-        pass
+    def eat(self) -> None:
+        for neighbour in self.neighbours:
+            if neighbour.is_alive():
+                if self.is_in_range(neighbour.get_position()) and self.is_successful_attempt(self.feeding_chance):
+                    food = neighbour.be_eaten()
+                    self.feed(food)
+                    return
+            else:
+                self.remove_from_neighbours(neighbour)
 
-    def reproduce(self):
+    def reproduce(self) -> None:
         if self.is_satiated() and self.is_successful_attempt(self.offspring_chance):
             self.produce_offspring()
 
@@ -102,7 +117,7 @@ class Organism:
     def is_satiated(self) -> bool:
         return self.hunger <= 0
 
-    def produce_offspring(self):
+    def produce_offspring(self) -> None:
         for i in range(self.litter_size):
             child = Organism(
                 self.species_name,
@@ -115,3 +130,20 @@ class Organism:
                 self.litter_size,
             )
             self.offspring.append(child)
+
+    def feed(self, food: int) -> None:
+        self.hunger -= food
+
+    def remove_from_neighbours(self, neighbour: Organism) -> None:
+        self.neighbours.remove(neighbour)
+
+    def be_eaten(self) -> int:
+        self.is_alive = False
+        food = int(self.base_hunger / 5) + 1
+        return food
+
+    def is_in_range(self, position) -> bool:
+        return self.navigator.is_in_range(self.position, position, self.feeding_range)
+
+    def get_position(self) -> (int, int):
+        return self.position
