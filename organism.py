@@ -130,7 +130,7 @@ class Organism:
             child = Organism(
                 self.species_name,
                 self.trophic_level,
-                self.navigator,
+                self.navigator.get_replica(),
                 self.speed,
                 self.base_hunger,
                 self.feeding_range,

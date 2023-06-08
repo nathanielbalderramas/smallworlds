@@ -25,12 +25,18 @@ class Navigator(ABC):
     ) -> bool:
         pass
 
+    @abstractmethod
+    def get_replica(self) -> any:
+        pass
 
 class ClassicNavigator(Navigator):
     def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
         self.orientation = np.zeros(2)
+
+    def get_replica(self) -> any:
+        return self.__class__(self.x, self.y)
 
     def initialize(self) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
