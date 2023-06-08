@@ -58,6 +58,7 @@ class Organism:
         self.is_alive = True
         self.reproduced_this_epoch = False
         self.offspring = []
+        self.neighbours = []
 
     def advance_time(self) -> None:
         """
