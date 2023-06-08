@@ -2,29 +2,44 @@ import textwrap
 import random
 
 
+# should be its own module
+class Navigator:
+    def move(
+        self,
+        position: (int, int),
+        velocity: (int, int),
+        speed: int,
+        neighbours: list[Organism],
+    ) -> ((int, int), (int, int)):
+        pass
+
+    def initialize(self) -> ((int, int), (int, int)):
+        pass
+
+
 class Organism:
     last_id = 1
 
     @staticmethod
-    def get_new_id():
+    def get_new_id() -> int:
         new_id = Organism.last_id
         Organism.last_id += 1
         return new_id
 
     @staticmethod
-    def is_successful_attempt(reference):
+    def is_successful_attempt(reference: int) -> bool:
         return random.randint(0, 100) <= reference
 
     def __init__(
         self,
-        species_name,
-        navigator,
-        speed,
-        base_hunger,
-        feeding_range,
-        feeding_chance,
-        offspring_chance,
-        litter_size,
+        species_name: str,
+        navigator: Navigator,
+        speed: int,
+        base_hunger: int,
+        feeding_range: int,
+        feeding_chance: int,
+        offspring_chance: int,
+        litter_size: int,
     ):
         # parameter dependent attributes
         self.species_name = species_name
@@ -70,7 +85,7 @@ class Organism:
         if self.is_satiated() and self.is_successful_attempt(self.offspring_chance):
             self.produce_offspring()
 
-    def __str__(self):
+    def __str__(self) -> str:
         # self string formatting
         txt = f"{self.species_name} {self.id}"
         txt += f"\nposition: {self.position} | velocity: {self.velocity} | hunger: {self.hunger}"
@@ -84,7 +99,7 @@ class Organism:
 
         return txt
 
-    def is_satiated(self):
+    def is_satiated(self) -> bool:
         return self.hunger <= 0
 
     def produce_offspring(self):
