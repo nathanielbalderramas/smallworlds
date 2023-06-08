@@ -29,6 +29,7 @@ class Navigator(ABC):
     def get_replica(self) -> any:
         pass
 
+
 class ClassicNavigator(Navigator):
     def __init__(self, x: int, y: int) -> None:
         self.x = x
