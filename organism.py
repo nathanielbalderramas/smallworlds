@@ -4,16 +4,53 @@ import numpy as np
 
 
 class Organism:
+    """
+    This is the base class of entities to be simulated.
+    It's core loop is move -> eat (try to) -> reproduce (try to)
+    could be subclassed and have some of it's methods overriden to account for certain "special" kind of organisms
+
+    non-obvious attributes:
+    -----------------------
+    navigator: an object capable of updating position and velocity for the organism according to environment rules.
+    also used to calculate distance between organisms.
+
+    trophic_level: how high it stands in the chain food.
+    Usually an organism can only feed of those who are of lower level.
+    base_hunger: how much it needs to eat before being able to reproduce.
+
+    offspring: a list of new organism that descend from this one.
+    They won't enter the simulation until the next epoch
+
+    neighbours: a list of organisms that the simulation has deemed sufficiently close to this one.
+    It's for computational efficiency reasons.
+    (see https://nanohub.org/resources/7578/download/Martini_L6_NeighborList.pdf as an introduction to the topic)
+
+    a note on speed and velocity:
+    -----------------------------
+    As commonly defined in physics, speed is a scalar value and velocity a vectorial one.
+    The norm of velocity is actually speed.
+    """
+
     last_id = 1
 
     @staticmethod
     def get_new_id() -> int:
+        """
+        This method ensures every organisms gets assigned a unique value of id
+        should update to account for different species names!
+        :return: id
+        """
         new_id = Organism.last_id
         Organism.last_id += 1
         return new_id
 
     @staticmethod
     def is_successful_attempt(reference: int) -> bool:
+        """
+        this method checks for a "roll of the dice"
+        :param reference: value to compare to random number. should be between 0 and 100.
+        :return: bool
+        """
         return random.randint(0, 100) <= reference
 
     def __init__(
@@ -118,16 +155,16 @@ class Organism:
 
     def is_satiated(self) -> bool:
         """
-        has this organism eaten enough food already?
+        checks whether this organism has eaten enough food.
         """
         return self.hunger <= 0
 
     def produce_offspring(self) -> None:
         """
-        creates a new organism and adds it to offspring list
+        creates a new organism of the same class and adds it to offspring list
         """
         for i in range(self.litter_size):
-            child = Organism(
+            child = self.__class__(
                 self.species_name,
                 self.trophic_level,
                 self.navigator.get_replica(),
@@ -142,19 +179,19 @@ class Organism:
 
     def feed(self, food: int) -> None:
         """
-        lowers hunger level
+        updates hunger value according to the amount of food ingested.
         """
         self.hunger -= food
 
     def remove_from_neighbours(self, neighbour: Organism) -> None:
         """
-        removes another organism from the neighbour list
+        removes another organism from the neighbour list.
         """
         self.neighbours.remove(neighbour)
 
     def be_eaten(self) -> int:
         """
-        dies and is turned into food
+        dies and is turned into some quantity of food.
         """
         self.is_alive = False
         food = int(self.base_hunger / 5) + 1
@@ -162,18 +199,19 @@ class Organism:
 
     def is_in_range(self, position: np.ndarray[float, float]) -> bool:
         """
-        is that other organism inside my feeding range?
+        checks whether another organism is inside feeding range
         """
         return self.navigator.is_in_range(self.position, position, self.feeding_range)
 
     def get_position(self) -> np.ndarray[float, float]:
         """
-        :returns: (x, y)
+        :returns: position (x, y)
         """
         return self.position
 
     def outrank(self, neighbour: Organism) -> bool:
         """
+        checks whether another organism is bellow in the food chain.
         :param neighbour: Organism
         :return: bool
         """
