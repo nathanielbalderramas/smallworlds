@@ -1,3 +1,4 @@
+from __future__ import annotations
 import textwrap
 import random
 import numpy as np
@@ -7,7 +8,7 @@ class Organism:
     """
     This is the base class of entities to be simulated.
     It's core loop is move -> eat (try to) -> reproduce (try to)
-    could be subclassed and have some of it's methods overriden to account for certain "special" kind of organisms
+    could be subclassed and have some of its methods overriden to account for certain "special" kind of organisms
 
     non-obvious attributes:
     -----------------------
@@ -30,18 +31,17 @@ class Organism:
     As commonly defined in physics, speed is a scalar value and velocity a vectorial one.
     The norm of velocity is actually speed.
     """
-
-    last_id = 1
+    ids = {}
 
     @staticmethod
-    def get_new_id() -> int:
+    def get_new_id(species_name) -> int:
         """
-        This method ensures every organisms gets assigned a unique value of id
-        should update to account for different species names!
-        :return: id
+        This method ensures that every  organism in a species
+        gets assigned a unique value of id
+        :return: new_id: int
         """
-        new_id = Organism.last_id
-        Organism.last_id += 1
+        new_id = Organism.ids.setdefault(species_name, 1)
+        Organism.ids[species_name] += 1
         return new_id
 
     @staticmethod
@@ -68,7 +68,7 @@ class Organism:
         # parameter dependent attributes
         self.species_name = species_name
         self.trophic_level = trophic_level
-        self.navigator = navigator
+        self.navigator = navigator.get_replica()
         self.speed = speed
         self.base_hunger = base_hunger
         self.feeding_range = feeding_range
@@ -77,7 +77,7 @@ class Organism:
         self.litter_size = litter_size
 
         # parameter independent attributes
-        self.id = Organism.get_new_id()
+        self.id = Organism.get_new_id(self.species_name)
         self.offspring = []
         self.neighbours = []
         self.hunger = 0
