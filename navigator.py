@@ -10,7 +10,7 @@ class Navigator(ABC):
 
     the concept behind this is that depending on the rules of an environment a certain displacement may
     or may not be valid, and the logic concerning this doesn't fit into the Organism class. It would also be weird
-    to ask for environment to move an organism around, so the solution i came up with is this class that calculates
+    to ask for environment to move an organism around, so the solution I came up with is this class that calculates
     where an organism should be on the next time step but only returns this information and then the Organism can update
     its position and velocity.
 
@@ -19,7 +19,7 @@ class Navigator(ABC):
     well, there may be different kinds of environment. as of right now an environment is only of rectangular shape and
     can have 1 or 2 periodic boundary conditions. the validations required to check whether a movement is valid or
     how far are two objects vary significantly, and it would be gruesome to have all of it coded into a single class
-    with conditional expressions to check for environment rules. Also, i would like to implement different box shapes
+    with conditional expressions to check for environment rules. Also, I would like to implement different box shapes
     in the future, as well as discretizing space into a rectangular or hexagonal grid, so the interface is welcome.
 
     For more information on Periodic Boundary Conditions see here
@@ -30,7 +30,6 @@ class Navigator(ABC):
         self,
         position: np.ndarray[float, float],
         speed: int,
-        neighbours: list[any],
     ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
         should calculate and return the position and orientation of an organism for the next step according to
@@ -38,7 +37,6 @@ class Navigator(ABC):
 
         :param position: a 2d vector
         :param speed:  a scalar
-        :param neighbours: list of neighbours (this is no needed currently.. should delete it! [YAGNI])
         :return: position (x, y) and orientation (x, y)
         """
         pass
@@ -68,18 +66,18 @@ class Navigator(ABC):
         pass
 
     @abstractmethod
-    def get_replica(self) -> any:
+    def get_replica(self) -> Navigator:
         """
-        Should create a new object of the same class with the same environment rules.
+        Creates a new object of the same class with the same environment rules.
         This is useful when reproducing organisms!
-        :return:
+        :return: Navigator
         """
         pass
 
 
 class ClassicNavigator(Navigator):
     """
-    This navigator responds to an enviroment that is continuous in nature, with rectangular shape and solid walls.
+    This navigator responds to an environment that is continuous in nature, with rectangular shape and solid walls.
     organisms bounce elastically into the walls
     """
     def __init__(self, x: int, y: int) -> None:
@@ -87,12 +85,12 @@ class ClassicNavigator(Navigator):
         self.y = y
         self.orientation = np.zeros(2)
 
-    def get_replica(self) -> any:
+    def get_replica(self) -> ClassicNavigator:
         return self.__class__(self.x, self.y)
 
     def initialize(self) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
-        return a set of randomized position and orientation to begin a simulation epoch.
+        returns a set of randomized position and orientation to begin a simulation epoch.
         :return: position (x, y), orientation (x, y)
         """
         # generates random position inside environment coordinates
@@ -110,9 +108,15 @@ class ClassicNavigator(Navigator):
     def move(
         self,
         position: np.ndarray[float, float],
-        speed: int,
-        neighbours: list[any],
+        speed: int
     ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
+        """
+        returns an updated position and velocity according to current position and speed,
+        respecting environment rules
+        :param position:
+        :param speed:
+        :return: position (x, y), orientation (x, y)
+        """
         velocity = self.orientation * speed
         position = position + velocity
         position, velocity = self.correct_trajectory(position, velocity)
@@ -161,7 +165,8 @@ class ClassicNavigator(Navigator):
 
         return position, velocity
 
-    def calculate_distance(self, a: np.ndarray[float, float], b: np.ndarray[float, float]) -> float:
+    @staticmethod
+    def calculate_distance(a: np.ndarray[float, float], b: np.ndarray[float, float]) -> float:
         """
         calculates the distance between points a and b in a simple Euclidean fashion
         :param a: position (x, y)
@@ -169,11 +174,3 @@ class ClassicNavigator(Navigator):
         :return: distance: float
         """
         return np.linalg.norm(b-a)
-
-
-if __name__ == "__main__":
-    n1 = ClassicNavigator(100, 100)
-    p0, o0 = n1.initialize()
-    print(p0, o0, n1.orientation)
-    p1, v1 = n1.move(p0, 10, [])
-    print(p1, v1)
