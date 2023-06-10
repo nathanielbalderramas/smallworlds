@@ -75,4 +75,13 @@ class Population:
             individual.reset()
 
         # resets dead_individuals
+        self.reset_dead_individuals()
+
+    def reset_dead_individuals(self) -> None:
+        """
+        destroys the last reference to each dead individual and clears the dead_individuals list
+        :return:
+        """
+        for dead in self.dead_individuals:
+            del dead
         self.dead_individuals = []
