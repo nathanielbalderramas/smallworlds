@@ -110,10 +110,9 @@ class Organism:
         """
         updates position and velocity
         """
-        self.position, orientation = self.navigator.move(
+        self.position, self.velocity = self.navigator.move(
             self.position, self.speed, self.neighbours
         )
-        self.velocity = self.speed * orientation
 
     def eat(self) -> None:
         """
