@@ -123,7 +123,7 @@ class Organism:
             if neighbour.is_alive:
                 if (
                     self.outrank(neighbour)
-                    and self.is_in_range(neighbour.get_position())
+                    and self.is_in_range(neighbour.position)
                     and self.is_successful_attempt(self.feeding_chance)
                 ):
                     food = neighbour.be_eaten()
@@ -203,12 +203,6 @@ class Organism:
         checks whether another organism is inside feeding range
         """
         return self.navigator.is_in_range(self.position, position, self.feeding_range)
-
-    def get_position(self) -> np.ndarray[float, float]:
-        """
-        :returns: position (x, y)
-        """
-        return self.position
 
     def outrank(self, neighbour: Organism) -> bool:
         """
