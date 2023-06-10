@@ -43,7 +43,9 @@ class Navigator(ABC):
         pass
 
     @abstractmethod
-    def initialize(self, speed) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
+    def initialize(
+        self, speed
+    ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
         should return a set of randomized position and orientation to begin a simulation epoch.
         :return: position (x, y), orientation (x, y)
@@ -90,7 +92,9 @@ class ClassicNavigator(Navigator):
     def get_replica(self) -> ClassicNavigator:
         return self.__class__(self.x, self.y)
 
-    def initialize(self, speed) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
+    def initialize(
+        self, speed
+    ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
         returns a set of randomized position and velocity to begin a simulation epoch.
         :return: position (x, y), velocity (x, y)
