@@ -11,6 +11,7 @@ class Population:
     -----------------------
     individuals_specs: is a dictionary containing arguments for initialization of organisms
     """
+
     def __init__(
         self,
         individuals_specs: dict,
@@ -18,6 +19,7 @@ class Population:
     ):
         self.species_name = individuals_specs["species_name"]
         self.trophic_level = individuals_specs["trophic_level"]
+        self.size = initial_size
         self.individuals_specs = individuals_specs
         self.living_individuals = []
         self.dead_individuals = []
@@ -50,16 +52,22 @@ class Population:
 
     def advance_time(self) -> None:
         """
-        makes every organism in the population to run for a timestep
+        Makes every organism in the population to run for a timestep.
+        If a dead organism is found then it's transferred to dead_individuals
         :return:
         """
+        self.size = len(self.living_individuals)
         for individual in self.living_individuals:
-            individual.advance_time()
+            if individual.is_alive:
+                individual.advance_time()
+            else:
+                self.remove_individual(individual)
 
-    def get_living_individuals(self):
-        return self.living_individuals
-
-    def advance_epoch(self):
+    def advance_epoch(self) -> None:
+        """
+        Adds offspring organisms to the pool of living organisms and resets every organism to begin a new epoch
+        :return:
+        """
         # generates new individuals based on the offspring of both dead and living individuals
         for individual in self.dead_individuals + self.living_individuals:
             for child in individual.get_offspring():
@@ -68,6 +76,3 @@ class Population:
 
         # resets dead_individuals
         self.dead_individuals = []
-
-        # to be continued
-        pass
