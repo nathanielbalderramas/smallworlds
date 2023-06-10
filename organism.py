@@ -31,6 +31,7 @@ class Organism:
     As commonly defined in physics, speed is a scalar value and velocity a vectorial one.
     The norm of velocity is actually speed.
     """
+
     ids = {}
 
     @staticmethod
@@ -119,7 +120,7 @@ class Organism:
         tries to eat another organism if its alive and in range.
         """
         for neighbour in self.neighbours:
-            if neighbour.is_alive():
+            if neighbour.is_alive:
                 if (
                     self.outrank(neighbour)
                     and self.is_in_range(neighbour.get_position())

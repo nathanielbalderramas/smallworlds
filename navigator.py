@@ -25,6 +25,7 @@ class Navigator(ABC):
     For more information on Periodic Boundary Conditions see here
     (https://en.wikipedia.org/wiki/Periodic_boundary_conditions)
     """
+
     @abstractmethod
     def move(
         self,
@@ -80,6 +81,7 @@ class ClassicNavigator(Navigator):
     This navigator responds to an environment that is continuous in nature, with rectangular shape and solid walls.
     organisms bounce elastically into the walls
     """
+
     def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
@@ -106,9 +108,7 @@ class ClassicNavigator(Navigator):
         return position, orientation
 
     def move(
-        self,
-        position: np.ndarray[float, float],
-        speed: int
+        self, position: np.ndarray[float, float], speed: int
     ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
         returns an updated position and velocity according to current position and speed,
@@ -166,11 +166,13 @@ class ClassicNavigator(Navigator):
         return position, velocity
 
     @staticmethod
-    def calculate_distance(a: np.ndarray[float, float], b: np.ndarray[float, float]) -> float:
+    def calculate_distance(
+        a: np.ndarray[float, float], b: np.ndarray[float, float]
+    ) -> float:
         """
         calculates the distance between points a and b in a simple Euclidean fashion
         :param a: position (x, y)
         :param b: position (x, y)
         :return: distance: float
         """
-        return np.linalg.norm(b-a)
+        return np.linalg.norm(b - a)
