@@ -19,7 +19,6 @@ class Population:
     ):
         self.species_name = individuals_specs["species_name"]
         self.trophic_level = individuals_specs["trophic_level"]
-        self.size = initial_size
         self.individuals_specs = individuals_specs
         self.living_individuals = []
         self.dead_individuals = []
@@ -56,7 +55,6 @@ class Population:
         If a dead organism is found then it's transferred to dead_individuals
         :return:
         """
-        self.size = len(self.living_individuals)
         for individual in self.living_individuals:
             if individual.is_alive:
                 individual.advance_time()
@@ -70,7 +68,7 @@ class Population:
         """
         # generates new individuals based on the offspring of both dead and living individuals
         for individual in self.dead_individuals + self.living_individuals:
-            for child in individual.get_offspring():
+            for child in individual.offspring:
                 self.add_individual(child)
             individual.reset()
 
@@ -85,3 +83,6 @@ class Population:
         for dead in self.dead_individuals:
             del dead
         self.dead_individuals = []
+
+    def get_size(self):
+        return len(self.living_individuals)
