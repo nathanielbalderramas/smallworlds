@@ -52,7 +52,7 @@ class Organism:
         :param reference: value to compare to random number. should be between 0 and 100.
         :return: bool
         """
-        return random.randint(0, 100) <= reference
+        return random.randint(0, 100) < reference
 
     def __init__(
         self,
@@ -65,6 +65,7 @@ class Organism:
         feeding_chance: int,
         offspring_chance: int,
         litter_size: int,
+        death_chance: int,
     ) -> None:
         # parameter dependent attributes
         self.species_name = species_name
@@ -76,6 +77,7 @@ class Organism:
         self.feeding_chance = feeding_chance
         self.offspring_chance = offspring_chance
         self.litter_size = litter_size
+        self.death_chance = death_chance
 
         # parameter independent attributes
         self.id = Organism.get_new_id(self.species_name)
@@ -87,11 +89,14 @@ class Organism:
         self.reproduced_this_epoch = False
         self.is_alive = False
 
+        # prepares for the start of the simulation
+        self.reset()
+
     def reset(self) -> None:
         """
         prepares to begin a new epoch
         """
-        self.position, self.velocity = self.navigator.initialize()
+        self.position, self.velocity = self.navigator.initialize(self.speed)
         self.hunger = self.base_hunger
         self.is_alive = True
         self.reproduced_this_epoch = False
@@ -105,14 +110,13 @@ class Organism:
         self.move()
         self.eat()
         self.reproduce()
+        self.die()
 
     def move(self) -> None:
         """
         updates position and velocity
         """
-        self.position, self.velocity = self.navigator.move(
-            self.position, self.speed, self.neighbours
-        )
+        self.position, self.velocity = self.navigator.move(self.position, self.speed)
 
     def eat(self) -> None:
         """
@@ -136,8 +140,13 @@ class Organism:
         """
         tries to produce offspring if its satiated
         """
-        if self.is_satiated() and self.is_successful_attempt(self.offspring_chance):
+        if (
+            self.is_satiated()
+            and not self.reproduced_this_epoch
+            and self.is_successful_attempt(self.offspring_chance)
+        ):
             self.produce_offspring()
+            self.reproduced_this_epoch = True
 
     def __str__(self) -> str:
         # self string formatting
@@ -174,6 +183,7 @@ class Organism:
                 self.feeding_chance,
                 self.offspring_chance,
                 self.litter_size,
+                self.death_chance
             )
             self.offspring.append(child)
 
@@ -210,3 +220,7 @@ class Organism:
         :return: bool
         """
         return self.trophic_level > neighbour.trophic_level
+
+    def die(self):
+        if self.is_alive and self.is_successful_attempt(self.death_chance):
+            self.is_alive = False
