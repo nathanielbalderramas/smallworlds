@@ -78,7 +78,7 @@ class Navigator(ABC):
         pass
 
 
-class ClassicNavigator(Navigator):
+class RectangularNonPeriodicNavigator(Navigator):
     """
     This navigator responds to an environment that is continuous in nature, with rectangular shape and solid walls.
     organisms bounce elastically into the walls
@@ -89,7 +89,7 @@ class ClassicNavigator(Navigator):
         self.y = y
         self.orientation = np.zeros(2)
 
-    def get_replica(self) -> ClassicNavigator:
+    def get_replica(self) -> Navigator:
         return self.__class__(self.x, self.y)
 
     def initialize(
@@ -181,3 +181,11 @@ class ClassicNavigator(Navigator):
         :return: distance: float
         """
         return np.linalg.norm(b - a)
+
+
+class RectangularPeriodicNavigator:
+    pass
+
+
+class RectangularPartiallyPeriodicNavigator:
+    pass
