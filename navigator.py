@@ -33,12 +33,12 @@ class Navigator(ABC):
         speed: int,
     ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
-        should calculate and return the position and orientation of an organism for the next step according to
+        should calculate and return the position and velocity an organism for the next step according to
         environment rules.
 
         :param position: a 2d vector
         :param speed:  a scalar
-        :return: position (x, y) and orientation (x, y)
+        :return: position (x, y) and velocity (x, y)
         """
         pass
 
@@ -47,8 +47,8 @@ class Navigator(ABC):
         self, speed
     ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
-        should return a set of randomized position and orientation to begin a simulation epoch.
-        :return: position (x, y), orientation (x, y)
+        should return a set of randomized position and velocity to begin a simulation epoch.
+        :return: position (x, y), velocity (x, y)
         """
         pass
 
@@ -87,7 +87,6 @@ class RectangularNonPeriodicNavigator(Navigator):
     def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
-        self.orientation = np.zeros(2)
 
     def get_replica(self) -> Navigator:
         return self.__class__(self.x, self.y)
@@ -105,24 +104,23 @@ class RectangularNonPeriodicNavigator(Navigator):
         )
 
         # generates random unitary orientation vector
-        orientation = np.random.rand(2)
+        orientation = np.random.rand(2) - [0.5, 0.5]
         orientation = orientation / np.linalg.norm(orientation)
-        self.orientation = orientation
-        velocity = speed * orientation
 
+        # calculates velocity
+        velocity = speed * orientation
         return position, velocity
 
     def move(
-        self, position: np.ndarray[float, float], speed: int
+        self, position: np.ndarray[float, float], velocity: np.ndarray[float, float]
     ) -> tuple[np.ndarray[float, float], np.ndarray[float, float]]:
         """
         returns an updated position and velocity according to current position and speed,
         respecting environment rules
         :param position:
-        :param speed:
-        :return: position (x, y), orientation (x, y)
+        :param velocity:
+        :return: position (x, y), velocity (x, y)
         """
-        velocity = self.orientation * speed
         position = position + velocity
         position, velocity = self.correct_trajectory(position, velocity)
         return position, velocity
