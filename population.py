@@ -16,6 +16,7 @@ class Population:
         self,
         individuals_specs: dict,
         initial_size: int,
+        **kwargs
     ):
         self.species_name = individuals_specs["species_name"]
         self.trophic_level = individuals_specs["trophic_level"]
@@ -86,3 +87,9 @@ class Population:
 
     def get_size(self):
         return len(self.living_individuals)
+
+    def get_organisms_matrix(self):
+        organisms_matrix = []
+        for o in self.living_individuals:
+            organisms_matrix.append(o.position)
+        return organisms_matrix

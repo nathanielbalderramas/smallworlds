@@ -1,6 +1,6 @@
 import environment
 import population
-
+import vis
 
 class Simulation:
     """
@@ -46,6 +46,9 @@ class Simulation:
         # calculates ideal range for neighbour lists
         self.neighbour_range = self.calculate_neighbour_range()
 
+        # generates symbol list for graphing purposes
+        self.symbol_list = self.generate_populations_symbol_list(populations_configs)
+
     def start_simulation(self, epochs_to_run: int) -> None:
         """
         begins a simulation run.
@@ -56,8 +59,22 @@ class Simulation:
         self.update_neighbours()
         while epochs_to_run:
             self.print_organisms_count(discriminate=True)  # for dev purposes
+            vis.plot_frame(
+                self.environment.dimensions,
+                self.get_populations_matrix(),
+                self.symbol_list,
+                self.epoch,
+                self.time
+            )
             while self.time <= self.time_per_epoch:
                 self.advance_time()
+                vis.plot_frame(
+                    self.environment.dimensions,
+                    self.get_populations_matrix(),
+                    self.symbol_list,
+                    self.epoch,
+                    self.time
+                )
             self.advance_epoch()
             epochs_to_run -= 1
 
@@ -142,3 +159,17 @@ class Simulation:
         """
         return self.environment.navigator.is_in_range(
             ind_i.position, ind_j.position, self.neighbour_range)
+
+    def get_populations_matrix(self):
+        populations_matrix = []
+        for p in self.populations:
+            populations_matrix.append(p.get_organisms_matrix())
+        return populations_matrix
+
+    def generate_populations_symbol_list(self, populations_configs):
+        symbol_list = []
+        for p in self.populations:
+            for pc in populations_configs:
+                if p.species_name == pc["individuals_specs"]["species_name"]:
+                    symbol_list.append(pc["symbol"])
+        return symbol_list
